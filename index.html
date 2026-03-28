@@ -695,6 +695,29 @@ Return this exact structure:
   document.getElementById('trans-btn').disabled = false;
 }
 
+function saveStory(story) {
+  if (!currentUser) return;
+
+  let stories = JSON.parse(localStorage.getItem(currentUser + "_stories") || "[]");
+
+  if (!stories.includes(story)) {
+    stories.unshift(story);
+    localStorage.setItem(currentUser + "_stories", JSON.stringify(stories));
+  }
+
+  loadSavedStories();
+}
+
+function loadSavedStories() {
+  const container = document.getElementById('saved-stories');
+  if (!container) return;
+
+  const stories = JSON.parse(localStorage.getItem(currentUser + "_stories") || "[]");
+
+  container.innerHTML = stories.map(s => `
+    <div class="chip" onclick="setStory('${s}')">${s}</div>
+  `).join('');
+}
 // Enter key on story input
 document.getElementById('story-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') runStoryArc();
