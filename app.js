@@ -18,7 +18,8 @@ function login() {
 
   currentUser = username;
   document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('user-display').innerText = "👤 " + username;
+  document.getElementById('user-display').innerText = 
+  "👤 " + currentUser + " · Your News Intelligence";
 
   loadSavedStories();
 }
