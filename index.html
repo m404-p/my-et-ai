@@ -604,6 +604,7 @@ Return this exact structure:
     document.getElementById('arc-loading').style.display = 'none';
     document.getElementById('arc-result').style.display = 'block';
     showToast('Story arc built!', '✅');
+    saveStory(story);
 
   } catch (e) {
     document.getElementById('arc-loading').style.display = 'none';
