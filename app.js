@@ -37,8 +37,16 @@ function checkLogin() {
     loadSavedStories();
   }
 }
+window.onload = () => {
+  checkLogin();
 
-window.onload = checkLogin;
+  // Auto demo
+  setTimeout(() => {
+    setStory("Adani-Hindenburg crisis");
+    runStoryArc();
+  }, 800);
+};
+
 function switchTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
