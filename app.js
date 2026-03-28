@@ -62,24 +62,41 @@ function showToast(msg, icon='ℹ️') {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-async function callClaude(system, userMsg, maxTokens=2000) {
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: maxTokens,
-      system,
-      messages: [{ role: 'user', content: userMsg }]
-    })
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || 'API error');
-  const text = data.content?.[0]?.text || '';
-  const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(clean);
-}
+async function callClaude(system, userMsg) {
+  await new Promise(r => setTimeout(r, 1200)); // fake delay
 
+  return {
+    overview: `${userMsg} has evolved with multiple turning points involving regulators, market sentiment, and public perception.`,
+    
+    timeline: [
+      { date: "Start", event: `${userMsg} begins`, sentiment: "negative" },
+      { date: "Middle", event: "Public reaction grows", sentiment: "neutral" },
+      { date: "Now", event: "Stabilization phase", sentiment: "positive" }
+    ],
+
+    players: [
+      { name: "Government", role: "Regulator", stance: "neutral" },
+      { name: "Investors", role: "Market force", stance: "mixed" }
+    ],
+
+    sentiment: [
+      { phase: "Early", score: 30 },
+      { phase: "Mid", score: 50 },
+      { phase: "Current", score: 70 }
+    ],
+
+    contrarian: [
+      { title: "Hidden Opportunity", text: "Market may be overreacting." }
+    ],
+
+    watchNext: [
+      { title: "Regulatory updates", detail: "Could shift direction" }
+    ],
+
+    translation: "Context-aware translated version of story",
+    contextAdded: "Explained in culturally relevant way"
+  };
+}
 // ══════════════════════════════
 //  STORY ARC TRACKER
 // ══════════════════════════════
