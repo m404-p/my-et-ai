@@ -131,7 +131,7 @@ Return this exact structure:
   ]
 }`;
 
-    const result = await callClaude(system, `Build a complete story arc for: "${story}"`);
+    const result = await callClaude(system, `Analyse My Story: "${story}"`);
 
     // Render overview
     document.getElementById('story-overview').innerHTML = result.overview || '';
