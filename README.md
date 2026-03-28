@@ -4,7 +4,7 @@
 > **Economic Times Hackathon Submission**
 > Built for the "AI-Native News Experience" problem statement
 
-[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-orange)](https://your-vercel-link.vercel.app)
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-View%20App-orange)](https://my-et-ai.vercel.app/)
 [![Built with Claude](https://img.shields.io/badge/AI-Claude%20Sonnet-blueviolet)](https://anthropic.com)
 
 ---
