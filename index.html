@@ -202,9 +202,15 @@ textarea.news-input::placeholder{color:var(--muted);}
 <div class="topbar">
   <div class="et-logo">
     <span class="et-badge">ET</span>
-    My ET <span style="color:var(--muted);font-weight:400;font-size:0.85rem;margin-left:4px">· AI-Native News</span>
+    My ET
   </div>
-  <div class="topbar-sub">Powered by Claude AI · Economic Times</div>
+
+  <div style="display:flex;align-items:center;gap:12px;">
+    <span id="user-display" style="font-size:0.8rem;color:#9aabc4;"></span>
+    <button onclick="logout()" style="padding:6px 10px;border:none;border-radius:6px;background:#ef4444;color:white;font-size:0.7rem;cursor:pointer;">
+      Logout
+    </button>
+  </div>
 </div>
 
 <div class="tabs">
