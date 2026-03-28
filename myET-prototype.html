@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My ET — AI-Native News Experience</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0b0e1a;
+  --surface: #111520;
+  --surface2: #171c2e;
+  --surface3: #1d2438;
+  --border: #232d45;
+  --border2: #2a3550;
+  --accent: #f97316;
+  --accent2: #3b82f6;
+  --accent3: #10b981;
+  --text: #e8edf5;
+  --text2: #9aabc4;
+  --muted: #4e6080;
+  --radius: 12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(249,115,22,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(249,115,22,0.02) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;background:rgba(11,14,26,0.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:54px;}
+.et-logo{display:flex;align-items:center;gap:10px;font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;}
+.et-badge{padding:3px 8px;background:var(--accent);color:#fff;font-size:0.65rem;font-weight:700;border-radius:4px;letter-spacing:0.06em;}
+.topbar-sub{font-size:0.72rem;color:var(--muted);letter-spacing:0.04em;}
+
+/* TABS */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface);position:relative;z-index:1;}
+.tab{flex:1;padding:14px 20px;background:none;border:none;color:var(--muted);font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;cursor:pointer;transition:all 0.2s;letter-spacing:0.04em;border-bottom:2px solid transparent;display:flex;align-items:center;justify-content:center;gap:8px;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(249,115,22,0.04);}
+.tab:hover:not(.active){color:var(--text);}
+.tab-icon{font-size:1rem;}
+
+/* PAGES */
+.page{display:none;min-height:calc(100vh - 110px);position:relative;z-index:1;}
+.page.active{display:block;}
+
+/* ══ STORY ARC TRACKER ══ */
+.sat-container{max-width:900px;margin:0 auto;padding:28px 24px;}
+.sat-hero{text-align:center;margin-bottom:32px;}
+.sat-hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.sat-hero h1 span{color:var(--accent);}
+.sat-hero p{color:var(--text2);font-size:0.9rem;max-width:500px;margin:0 auto;}
+
+.search-bar{display:flex;gap:10px;margin-bottom:24px;}
+.search-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.95rem;outline:none;transition:border-color 0.2s;}
+.search-input:focus{border-color:var(--accent);}
+.search-input::placeholder{color:var(--muted);}
+.search-btn{padding:14px 24px;background:var(--accent);border:none;border-radius:var(--radius);color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.2s;white-space:nowrap;}
+.search-btn:hover{opacity:0.9;transform:translateY(-1px);}
+.search-btn:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+
+.story-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+.chip{padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+.chip:hover{border-color:var(--accent);color:var(--accent);}
+
+/* Results */
+#arc-result{display:none;}
+.arc-sections{display:flex;flex-direction:column;gap:20px;}
+
+.arc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.arc-card-header{padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:var(--surface2);}
+.arc-card-icon{font-size:1.1rem;}
+.arc-card-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;color:var(--text);}
+.arc-card-body{padding:18px;}
+
+/* Timeline */
+.timeline{position:relative;padding-left:28px;}
+.timeline::before{content:'';position:absolute;left:9px;top:6px;bottom:6px;width:1.5px;background:var(--border2);}
+.tl-event{position:relative;margin-bottom:18px;}
+.tl-event:last-child{margin-bottom:0;}
+.tl-dot{position:absolute;left:-23px;top:4px;width:10px;height:10px;border-radius:50%;border:2px solid var(--accent);background:var(--bg);}
+.tl-dot.neg{border-color:#ef4444;}
+.tl-dot.neutral{border-color:#f59e0b;}
+.tl-date{font-size:0.7rem;color:var(--muted);margin-bottom:3px;letter-spacing:0.04em;}
+.tl-text{font-size:0.85rem;color:var(--text2);line-height:1.5;}
+.tl-text strong{color:var(--text);}
+
+/* Players grid */
+.players-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;}
+.player-card{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;}
+.player-name{font-size:0.85rem;font-weight:500;color:var(--text);margin-bottom:4px;}
+.player-role{font-size:0.72rem;color:var(--muted);}
+.player-tag{display:inline-block;margin-top:6px;padding:2px 8px;border-radius:4px;font-size:0.68rem;font-weight:600;}
+.player-tag.bull{background:rgba(16,185,129,0.12);color:#10b981;border:1px solid rgba(16,185,129,0.25);}
+.player-tag.bear{background:rgba(239,68,68,0.12);color:#ef4444;border:1px solid rgba(239,68,68,0.25);}
+.player-tag.neutral{background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.25);}
+
+/* Sentiment bars */
+.sentiment-track{display:flex;flex-direction:column;gap:10px;}
+.sent-row{display:flex;align-items:center;gap:10px;font-size:0.8rem;}
+.sent-label{width:100px;color:var(--text2);}
+.sent-bar-wrap{flex:1;height:8px;background:var(--border);border-radius:8px;overflow:hidden;}
+.sent-bar{height:100%;border-radius:8px;transition:width 1s ease;}
+.sent-val{width:36px;text-align:right;color:var(--muted);font-size:0.75rem;}
+
+/* Contrarian + Predictions */
+.insight-box{background:var(--surface2);border-left:3px solid var(--accent);border-radius:0 8px 8px 0;padding:12px 16px;margin-bottom:10px;font-size:0.85rem;color:var(--text2);line-height:1.6;}
+.insight-box:last-child{margin-bottom:0;}
+.insight-box strong{color:var(--text);display:block;margin-bottom:4px;font-size:0.82rem;}
+.watch-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);font-size:0.84rem;}
+.watch-item:last-child{border-bottom:none;}
+.watch-icon{font-size:1rem;flex-shrink:0;}
+.watch-text{color:var(--text2);line-height:1.5;}
+.watch-text strong{color:var(--text);}
+
+/* Loading state */
+.loading-state{text-align:center;padding:48px 24px;}
+.loading-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text2);font-size:0.88rem;}
+.loading-steps{display:flex;flex-direction:column;gap:8px;margin-top:16px;text-align:left;max-width:280px;margin-left:auto;margin-right:auto;}
+.loading-step{font-size:0.78rem;color:var(--muted);display:flex;align-items:center;gap:8px;}
+.loading-step.done{color:var(--accent3);}
+.step-dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+
+/* ══ VERNACULAR ENGINE ══ */
+.vne-container{max-width:900px;margin:0 auto;padding:28px 24px;}
+.vne-hero{text-align:center;margin-bottom:32px;}
+.vne-hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:8px;}
+.vne-hero h1 span{color:var(--accent2);}
+.vne-hero p{color:var(--text2);font-size:0.9rem;max-width:520px;margin:0 auto;}
+
+.vne-layout{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+.vne-input-panel,.vne-output-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface2);display:flex;align-items:center;justify-content:space-between;}
+.panel-title{font-family:'Syne',sans-serif;font-weight:700;font-size:0.82rem;}
+.panel-body{padding:16px;}
+
+textarea.news-input{width:100%;min-height:220px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:12px 14px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:0.87rem;line-height:1.6;outline:none;resize:vertical;transition:border-color 0.2s;}
+textarea.news-input:focus{border-color:var(--accent2);}
+textarea.news-input::placeholder{color:var(--muted);}
+
+.lang-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:14px 0;}
+.lang-btn{padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:0.82rem;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'DM Sans',sans-serif;}
+.lang-btn:hover{border-color:var(--accent2);color:var(--accent2);}
+.lang-btn.active{background:rgba(59,130,246,0.1);border-color:var(--accent2);color:var(--accent2);font-weight:500;}
+.lang-name{font-size:0.88rem;}
+.lang-script{font-size:0.72rem;color:var(--muted);}
+
+.translate-btn{width:100%;padding:12px;background:var(--accent2);border:none;border-radius:9px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;transition:all 0.2s;margin-top:4px;}
+.translate-btn:hover{opacity:0.9;}
+.translate-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+.sample-news{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.sample-item{padding:8px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;font-size:0.75rem;color:var(--text2);cursor:pointer;transition:all 0.2s;line-height:1.4;}
+.sample-item:hover{border-color:var(--accent2);color:var(--text);}
+
+/* Translation output */
+.translation-output{min-height:220px;}
+.trans-loading{text-align:center;padding:40px 20px;color:var(--muted);font-size:0.85rem;}
+.trans-result{display:none;}
+.trans-lang-tag{display:inline-flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.25);border-radius:20px;color:var(--accent2);font-size:0.72rem;font-weight:600;margin-bottom:12px;}
+.trans-text{font-size:0.9rem;line-height:1.75;color:var(--text2);margin-bottom:14px;}
+.trans-context{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:0.8rem;color:var(--text2);line-height:1.6;}
+.trans-context-label{font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:var(--muted);margin-bottom:6px;font-weight:500;}
+
+/* Sample articles for VNE */
+.vne-samples{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+.vne-chip{padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;color:var(--text2);font-size:0.75rem;cursor:pointer;transition:all 0.2s;}
+.vne-chip:hover{border-color:var(--accent2);color:var(--accent2);}
+
+/* Toast */
+#toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:0.82rem;display:flex;align-items:center;gap:7px;transform:translateY(20px);opacity:0;transition:all 0.3s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,0.4);}
+#toast.show{transform:translateY(0);opacity:1;}
+
+@media(max-width:700px){
+  .vne-layout{grid-template-columns:1fr;}
+  .sat-hero h1,.vne-hero h1{font-size:1.5rem;}
+  .players-grid{grid-template-columns:1fr 1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="et-logo">
+    <span class="et-badge">ET</span>
+    My ET <span style="color:var(--muted);font-weight:400;font-size:0.85rem;margin-left:4px">· AI-Native News</span>
+  </div>
+  <div class="topbar-sub">Powered by Claude AI · Economic Times</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('arc',this)">
+    <span class="tab-icon">📈</span> Story Arc Tracker
+  </button>
+  <button class="tab" onclick="switchTab('vne',this)">
+    <span class="tab-icon">🌐</span> Vernacular Engine
+  </button>
+</div>
+
+<!-- ══════════ STORY ARC TRACKER ══════════ -->
+<div class="page active" id="page-arc">
+  <div class="sat-container">
+    <div class="sat-hero">
+      <h1>Story Arc <span>Tracker</span></h1>
+      <p>Pick any ongoing business story. AI builds a complete visual narrative — timeline, players, sentiment, contrarian view, and predictions.</p>
+    </div>
+
+    <div class="search-bar">
+      <input class="search-input" id="story-input" type="text" placeholder="e.g. Adani-Hindenburg, Paytm RBI ban, Byju's collapse, Jio vs Airtel..." />
+      <button class="search-btn" id="arc-btn" onclick="runStoryArc()">Build Story Arc →</button>
+    </div>
+
+    <div class="story-chips">
+      <span style="font-size:0.75rem;color:var(--muted);align-self:center;">Try:</span>
+      <div class="chip" onclick="setStory('Adani-Hindenburg crisis')">Adani-Hindenburg</div>
+      <div class="chip" onclick="setStory('Paytm RBI banking licence ban')">Paytm RBI ban</div>
+      <div class="chip" onclick="setStory('Byju\'s financial collapse')">Byju's collapse</div>
+      <div class="chip" onclick="setStory('Jio vs Airtel 5G battle')">Jio vs Airtel 5G</div>
+      <div class="chip" onclick="setStory('Zomato Blinkit acquisition')">Zomato-Blinkit</div>
+      <div class="chip" onclick="setStory('India startup funding winter 2023')">Startup funding winter</div>
+    </div>
+
+    <div id="arc-loading" style="display:none;">
+      <div class="loading-state">
+        <div class="loading-spinner"></div>
+        <div class="loading-text" id="loading-msg">Analyzing story arc...</div>
+        <div class="loading-steps" id="loading-steps">
+          <div class="loading-step" id="ls1"><span class="step-dot"></span>Identifying key events on timeline</div>
+          <div class="loading-step" id="ls2"><span class="step-dot"></span>Mapping key players & roles</div>
+          <div class="loading-step" id="ls3"><span class="step-dot"></span>Tracking sentiment shifts</div>
+          <div class="loading-step" id="ls4"><span class="step-dot"></span>Surfacing contrarian perspectives</div>
+          <div class="loading-step" id="ls5"><span class="step-dot"></span>Generating predictions</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="arc-result">
+      <div class="arc-sections">
+
+        <div class="arc-card">
+          <div class="arc-card-header">
+            <span class="arc-card-icon">📰</span>
+            <span class="arc-card-title">Story Overview</span>
+          </div>
+          <div class="arc-card-body">
+            <div id="story-overview" style="font-size:0.88rem;color:var(--text2);line-height:1.7;"></div>
+          </div>
+        </div>
+
+        <div class="arc-card">
+          <div class="arc-card-header">
+            <span class="arc-card-icon">🕐</span>
+            <span class="arc-card-title">Interactive Timeline</span>
+          </div>
+          <div class="arc-card-body">
+            <div class="timeline" id="timeline-container"></div>
+          </div>
+        </div>
+
+        <div class="arc-card">
+          <div class="arc-card-header">
+            <span class="arc-card-icon">👥</span>
+            <span class="arc-card-title">Key Players</span>
+          </div>
+          <div class="arc-card-body">
+            <div class="players-grid" id="players-container"></div>
+          </div>
+        </div>
+
+        <div class="arc-card">
+          <div class="arc-card-header">
+            <span class="arc-card-icon">📊</span>
+            <span class="arc-card-title">Sentiment Shifts</span>
+          </div>
+          <div class="arc-card-body">
+            <div class="sentiment-track" id="sentiment-container"></div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="arc-card">
+            <div class="arc-card-header">
+              <span class="arc-card-icon">🔄</span>
+              <span class="arc-card-title">Contrarian Perspectives</span>
+            </div>
+            <div class="arc-card-body" id="contrarian-container"></div>
+          </div>
+          <div class="arc-card">
+            <div class="arc-card-header">
+              <span class="arc-card-icon">🔭</span>
+              <span class="arc-card-title">What to Watch Next</span>
+            </div>
+            <div class="arc-card-body" id="watchnext-container"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════ VERNACULAR ENGINE ══════════ -->
+<div class="page" id="page-vne">
+  <div class="vne-container">
+    <div class="vne-hero">
+      <h1>Vernacular <span>Engine</span></h1>
+      <p>Real-time, culturally adapted translation of ET business news — not literal word-for-word, but contextually meaningful for each language's audience.</p>
+    </div>
+
+    <div class="vne-samples">
+      <span style="font-size:0.75rem;color:var(--muted);align-self:center;">Sample articles:</span>
+      <div class="vne-chip" onclick="loadSample(0)">RBI rate cut</div>
+      <div class="vne-chip" onclick="loadSample(1)">Sensex rally</div>
+      <div class="vne-chip" onclick="loadSample(2)">Startup funding</div>
+      <div class="vne-chip" onclick="loadSample(3)">GST reform</div>
+      <div class="vne-chip" onclick="loadSample(4)">IT sector layoffs</div>
+    </div>
+
+    <div class="vne-layout">
+      <div class="vne-input-panel">
+        <div class="panel-header">
+          <span class="panel-title">📰 English News Article</span>
+          <span style="font-size:0.72rem;color:var(--muted);">Paste or pick a sample</span>
+        </div>
+        <div class="panel-body">
+          <textarea class="news-input" id="news-text" placeholder="Paste any ET business news article here...
+
+Example: 'The Reserve Bank of India's Monetary Policy Committee cut the repo rate by 25 basis points to 6.25% on Friday, marking the first rate reduction in nearly five years...'"></textarea>
+
+          <div style="margin-top:14px;margin-bottom:6px;font-size:0.75rem;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;">Translate to</div>
+          <div class="lang-grid">
+            <button class="lang-btn active" onclick="selectLang('hindi','हिन्दी',this)" id="btn-hindi">
+              <div class="lang-name">Hindi</div>
+              <div class="lang-script">हिन्दी · 528M speakers</div>
+            </button>
+            <button class="lang-btn" onclick="selectLang('tamil','தமிழ்',this)" id="btn-tamil">
+              <div class="lang-name">Tamil</div>
+              <div class="lang-script">தமிழ் · 75M speakers</div>
+            </button>
+            <button class="lang-btn" onclick="selectLang('telugu','తెలుగు',this)" id="btn-telugu">
+              <div class="lang-name">Telugu</div>
+              <div class="lang-script">తెలుగు · 95M speakers</div>
+            </button>
+            <button class="lang-btn" onclick="selectLang('bengali','বাংলা',this)" id="btn-bengali">
+              <div class="lang-name">Bengali</div>
+              <div class="lang-script">বাংলা · 230M speakers</div>
+            </button>
+          </div>
+          <button class="translate-btn" id="trans-btn" onclick="runTranslation()">Translate with Cultural Context →</button>
+        </div>
+      </div>
+
+      <div class="vne-output-panel">
+        <div class="panel-header">
+          <span class="panel-title" id="output-lang-title">🌐 Translation Output</span>
+          <span id="output-lang-badge" style="font-size:0.72rem;color:var(--muted);">Select language</span>
+        </div>
+        <div class="panel-body">
+          <div class="translation-output">
+            <div id="trans-placeholder" style="padding:40px 0;text-align:center;color:var(--muted);font-size:0.85rem;line-height:1.7;">
+              Paste an article and choose a language.<br>AI will translate with cultural context,<br>local analogies and reader-first explanations.
+            </div>
+            <div id="trans-loading" style="display:none;" class="trans-loading">
+              <div class="loading-spinner" style="margin:0 auto 12px;width:28px;height:28px;border-width:2px;border-top-color:var(--accent2);"></div>
+              Translating with cultural context...
+            </div>
+            <div class="trans-result" id="trans-result">
+              <div class="trans-lang-tag" id="trans-tag"></div>
+              <div class="trans-text" id="trans-text"></div>
+              <div class="trans-context">
+                <div class="trans-context-label">Cultural context added by AI</div>
+                <div id="trans-context-text"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════
+//  SHARED
+// ══════════════════════════════
+function switchTab(tab, el) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + tab).classList.add('active');
+}
+
+function showToast(msg, icon='ℹ️') {
+  const t = document.getElementById('toast');
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+async function callClaude(system, userMsg, maxTokens=2000) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: maxTokens,
+      system,
+      messages: [{ role: 'user', content: userMsg }]
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || 'API error');
+  const text = data.content?.[0]?.text || '';
+  const clean = text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  return JSON.parse(clean);
+}
+
+// ══════════════════════════════
+//  STORY ARC TRACKER
+// ══════════════════════════════
+function setStory(s) {
+  document.getElementById('story-input').value = s;
+}
+
+async function runStoryArc() {
+  const story = document.getElementById('story-input').value.trim();
+  if (!story) { showToast('Please enter a business story topic', '⚠️'); return; }
+
+  document.getElementById('arc-result').style.display = 'none';
+  document.getElementById('arc-loading').style.display = 'block';
+  document.getElementById('arc-btn').disabled = true;
+
+  // Animate loading steps
+  const steps = ['ls1','ls2','ls3','ls4','ls5'];
+  const delays = [0, 800, 1600, 2400, 3200];
+  steps.forEach((id, i) => {
+    setTimeout(() => {
+      document.getElementById(id).classList.add('done');
+    }, delays[i]);
+  });
+
+  try {
+    const system = `You are a business journalist AI for Economic Times India. Given a business story topic, return a detailed JSON analysis. Return ONLY valid JSON, no markdown.
+
+Return this exact structure:
+{
+  "overview": "2-3 sentence overview of the story",
+  "timeline": [
+    {"date": "Month Year", "event": "What happened", "sentiment": "positive|negative|neutral"},
+    ... (5-7 events)
+  ],
+  "players": [
+    {"name": "Name", "role": "Their role", "stance": "bull|bear|neutral"},
+    ... (4-6 players)
+  ],
+  "sentiment": [
+    {"phase": "Phase name", "score": 75, "color": "positive|negative|neutral"},
+    ... (4-5 phases)
+  ],
+  "contrarian": [
+    {"title": "Contrarian point title", "text": "Explanation"},
+    {"title": "Another angle", "text": "Explanation"}
+  ],
+  "watchNext": [
+    {"icon": "📅", "title": "What to watch", "detail": "Explanation of why this matters"},
+    ... (3-4 items)
+  ]
+}`;
+
+    const result = await callClaude(system, `Build a complete story arc for: "${story}"`);
+
+    // Render overview
+    document.getElementById('story-overview').innerHTML = result.overview || '';
+
+    // Render timeline
+    const tlContainer = document.getElementById('timeline-container');
+    tlContainer.innerHTML = (result.timeline || []).map(ev => `
+      <div class="tl-event">
+        <div class="tl-dot ${ev.sentiment === 'negative' ? 'neg' : ev.sentiment === 'neutral' ? 'neutral' : ''}"></div>
+        <div class="tl-date">${ev.date}</div>
+        <div class="tl-text">${ev.event}</div>
+      </div>`).join('');
+
+    // Render players
+    const playersContainer = document.getElementById('players-container');
+    playersContainer.innerHTML = (result.players || []).map(p => `
+      <div class="player-card">
+        <div class="player-name">${p.name}</div>
+        <div class="player-role">${p.role}</div>
+        <span class="player-tag ${p.stance}">${p.stance === 'bull' ? '↑ Bullish' : p.stance === 'bear' ? '↓ Bearish' : '→ Neutral'}</span>
+      </div>`).join('');
+
+    // Render sentiment
+    const sentContainer = document.getElementById('sentiment-container');
+    sentContainer.innerHTML = (result.sentiment || []).map(s => {
+      const color = s.color === 'positive' ? '#10b981' : s.color === 'negative' ? '#ef4444' : '#f59e0b';
+      return `
+      <div class="sent-row">
+        <div class="sent-label">${s.phase}</div>
+        <div class="sent-bar-wrap">
+          <div class="sent-bar" style="width:${s.score}%;background:${color};"></div>
+        </div>
+        <div class="sent-val">${s.score}%</div>
+      </div>`;
+    }).join('');
+
+    // Render contrarian
+    const contraContainer = document.getElementById('contrarian-container');
+    contraContainer.innerHTML = (result.contrarian || []).map(c => `
+      <div class="insight-box">
+        <strong>${c.title}</strong>${c.text}
+      </div>`).join('');
+
+    // Render watch next
+    const watchContainer = document.getElementById('watchnext-container');
+    watchContainer.innerHTML = (result.watchNext || []).map(w => `
+      <div class="watch-item">
+        <span class="watch-icon">${w.icon}</span>
+        <div class="watch-text"><strong>${w.title}</strong>${w.detail}</div>
+      </div>`).join('');
+
+    document.getElementById('arc-loading').style.display = 'none';
+    document.getElementById('arc-result').style.display = 'block';
+    showToast('Story arc built!', '✅');
+
+  } catch (e) {
+    document.getElementById('arc-loading').style.display = 'none';
+    showToast('Error: ' + e.message, '❌');
+    console.error(e);
+  }
+  document.getElementById('arc-btn').disabled = false;
+  // Reset loading steps
+  steps.forEach(id => document.getElementById(id).classList.remove('done'));
+}
+
+// ══════════════════════════════
+//  VERNACULAR ENGINE
+// ══════════════════════════════
+let selectedLang = 'hindi';
+let selectedLangName = 'हिन्दी';
+
+const sampleArticles = [
+  `The Reserve Bank of India's Monetary Policy Committee cut the repo rate by 25 basis points to 6.25% on Friday, marking the first rate reduction in nearly five years. The decision, which was unanimous, signals a shift in the central bank's stance from 'withdrawal of accommodation' to 'neutral' as inflation eases closer to the 4% target. EMIs on home and auto loans are expected to drop in the coming weeks as banks transmit the rate cut.`,
+  `Indian benchmark indices Sensex and Nifty 50 surged to record highs on Monday, driven by strong buying in financial and IT stocks. The Sensex jumped 1,200 points to breach the 75,000 mark for the first time, while Nifty 50 crossed 22,800. Foreign institutional investors pumped Rs 4,200 crore into Indian equities, the highest single-day inflow in three months, amid expectations of a US Fed rate pivot.`,
+  `Indian startups raised just $8.1 billion in venture capital funding in 2023, a 72% drop from the $29 billion peak in 2021, as investors demanded profitability over growth. Late-stage funding has dried up, forcing unicorns like Byju's and Ola to restructure. However, early-stage deals remain active, with fintech, B2B SaaS, and climate tech attracting the most interest from investors.`,
+  `The government is considering a major overhaul of the Goods and Services Tax structure, proposing to collapse the current four-slab system into a simpler two or three-tier model. The reform aims to reduce compliance burden for small businesses and boost consumption. The GST Council will meet next month to deliberate on rationalising rates on over 50 items, including insurance premiums and food processing products.`,
+  `India's IT sector is bracing for continued headwinds in 2024 as major companies including TCS, Infosys, and Wipro signal muted revenue growth amid weak demand from the US and European markets. The industry added just 60,000 jobs last year compared to over 4 lakh in 2022. Fresh campus hiring has been deferred, and lateral hiring remains frozen as clients cut discretionary technology spending.`
+];
+
+function loadSample(idx) {
+  document.getElementById('news-text').value = sampleArticles[idx];
+}
+
+function selectLang(lang, name, btn) {
+  selectedLang = lang;
+  selectedLangName = name;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function runTranslation() {
+  const article = document.getElementById('news-text').value.trim();
+  if (!article) { showToast('Please paste a news article', '⚠️'); return; }
+
+  document.getElementById('trans-placeholder').style.display = 'none';
+  document.getElementById('trans-loading').style.display = 'block';
+  document.getElementById('trans-result').style.display = 'none';
+  document.getElementById('trans-btn').disabled = true;
+  document.getElementById('output-lang-title').textContent = `🌐 ${selectedLang.charAt(0).toUpperCase() + selectedLang.slice(1)} Translation`;
+
+  const langInstructions = {
+    hindi: `Translate to Hindi (हिन्दी). Use simple, everyday Hindi that a middle-class reader in Delhi or Mumbai would understand. Use analogies from Indian daily life. For financial terms, use the Hindi term with English in brackets if needed.`,
+    tamil: `Translate to Tamil (தமிழ்). Use clear, modern Tamil. Add context relevant to Tamil Nadu's business community — manufacturing, IT corridor, agriculture. Reference local institutions like Tamil Nadu government, Chennai stock exchange activity when relevant.`,
+    telugu: `Translate to Telugu (తెలుగు). Use modern Telugu that readers in Hyderabad, Vijayawada and Visakhapatnam would relate to. Reference Telangana/AP economic context, local industries like pharma and IT where appropriate.`,
+    bengali: `Translate to Bengali (বাংলা). Use standard Bengali. Add context relevant to Bengal — Kolkata business community, jute, manufacturing, startups. Reference West Bengal or Bangladesh economic context where relevant.`
+  };
+
+  try {
+    const system = `You are a culturally intelligent translation engine for Economic Times. You do NOT do literal translation — you do cultural adaptation. Return ONLY valid JSON, no markdown.
+
+Your job:
+1. Translate the article to the target language naturally and fluently
+2. Replace Western/generic analogies with India-specific local ones
+3. Add a brief "cultural context" note in English explaining what local context you added and why
+4. Make complex financial terms understandable to a general audience
+
+Return this exact structure:
+{
+  "translation": "Full translated article text in the target language",
+  "contextAdded": "2-3 sentences in English explaining what cultural context or local analogies you added to make it more relevant to this language's audience"
+}`;
+
+    const result = await callClaude(system,
+      `${langInstructions[selectedLang]}\n\nArticle to translate:\n${article}`,
+      1500
+    );
+
+    document.getElementById('trans-loading').style.display = 'none';
+    document.getElementById('trans-tag').textContent = `${selectedLangName} · Culturally Adapted`;
+    document.getElementById('trans-text').textContent = result.translation || '';
+    document.getElementById('trans-context-text').textContent = result.contextAdded || '';
+    document.getElementById('trans-result').style.display = 'block';
+    document.getElementById('output-lang-badge').textContent = selectedLangName;
+    showToast('Translated with cultural context!', '✅');
+
+  } catch (e) {
+    document.getElementById('trans-loading').style.display = 'none';
+    document.getElementById('trans-placeholder').style.display = 'block';
+    showToast('Error: ' + e.message, '❌');
+    console.error(e);
+  }
+  document.getElementById('trans-btn').disabled = false;
+}
+
+// Enter key on story input
+document.getElementById('story-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') runStoryArc();
+});
+</script>
+</body>
+</html>
