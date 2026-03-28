@@ -180,6 +180,25 @@ textarea.news-input::placeholder{color:var(--muted);}
 </head>
 <body>
 
+<!-- LOGIN SCREEN -->
+<div id="login-screen" style="position:fixed;inset:0;background:#0b0e1a;display:flex;align-items:center;justify-content:center;z-index:999;">
+  <div style="background:#111520;padding:32px;border-radius:16px;width:320px;text-align:center;border:1px solid #232d45;">
+    <h2 style="font-family:'Syne';margin-bottom:10px;">Welcome to My ET</h2>
+    <p style="font-size:0.8rem;color:#9aabc4;margin-bottom:20px;">Your personalized AI news space</p>
+    
+    <input id="username" placeholder="Enter username" 
+      style="width:100%;padding:10px;margin-bottom:10px;border-radius:8px;border:1px solid #232d45;background:#171c2e;color:#fff;">
+    
+    <input id="password" type="password" placeholder="Password" 
+      style="width:100%;padding:10px;margin-bottom:16px;border-radius:8px;border:1px solid #232d45;background:#171c2e;color:#fff;">
+    
+    <button onclick="login()" 
+      style="width:100%;padding:10px;background:#f97316;border:none;border-radius:8px;color:white;font-weight:600;cursor:pointer;">
+      Login / Sign Up
+    </button>
+  </div>
+</div>
+  
 <div class="topbar">
   <div class="et-logo">
     <span class="et-badge">ET</span>
